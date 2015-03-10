@@ -10,11 +10,26 @@ def get_servers():
   # Build our list of servers
   with open('servers.lst') as servers_list:
     for server in servers_list:
-
-      if len(server.split(":")) > 1:
+      
+      # Was a port specified?
+      if ":" in server:
         address, port = server.split(":")
-        server_info = (address, int(port))
 
+        # Is it a port range?
+        if "-" in server:
+          start, end = port.split("-")
+
+          for sub_port in range(int(start), int(end) + 1):
+            server_info = (address, sub_port)
+            servers.append(server_info)
+
+          continue
+
+        # If not, grab whatever port it has specified.
+        else:
+          server_info = (address, int(port))
+
+      # Default to 27015
       else:
         server_info = (address, 27015)
 
@@ -37,18 +52,22 @@ def loop(servers, path_to_steam):
 
   while True:
     try:
+      # Grab the server object from Valve's master query server, or timeout
       server = volvo.ServerQuerier(current_server, timeout=5.0)
       player_count = server.get_info()["player_count"]
       
+      # Do we need to seed this server?
       if player_count < 2:
         print("Joining %s:%d" % current_server)
         current_thread = launch_game(current_server, path_to_steam)
 
+        # Check every 30 seconds to see if at least one human has joined
         while player_count < 2:
           try:
             server = volvo.ServerQuerier(current_server, timeout=5.0)
             new_player_count = server.get_info()["player_count"]
             
+            # Check if the new_player_count is actually a number due to Volvo shenanigans.
             if isinstance(new_player_count, int):
               player_count = new_player_count
 
@@ -57,9 +76,11 @@ def loop(servers, path_to_steam):
 
           time.sleep(30)
 
+        # Very roughly destroy the L4D2 process using a Windows only CMD tool.
         print("Server seeded: %s:%d" % current_server)
         subprocess.call("TASKKILL /F /IM left4dead2.exe")
 
+      # If the server is already seeded, cycle to the next in the list.
       else:
         print("Server %s:%d was already seeded. (%d players)" % (current_server[0], current_server[1], player_count))
         servers.append(servers.pop(0))
