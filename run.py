@@ -77,17 +77,30 @@ def loop(servers, path_to_steam):
           time.sleep(30)
 
         # Very roughly destroy the L4D2 process using a Windows only CMD tool.
-        print("Server seeded: %s:%d" % current_server)
+        print("Server seeded: %s:%d (%d players)" % (current_server[0], current_server[1], player_count))
         subprocess.call("TASKKILL /F /IM left4dead2.exe")
 
-      # If the server is already seeded, cycle to the next in the list.
+        # Cycle to the next server in the list
+        servers.append(servers.pop(0))
+        current_server = servers[0]
+
+      # This server is already seeded.
       else:
         print("Server %s:%d was already seeded. (%d players)" % (current_server[0], current_server[1], player_count))
+
+        # Cycle to the next server in the list
         servers.append(servers.pop(0))
         current_server = servers[0]
 
     except volvo.NoResponseError:
       print("Master server request timed out! Volvo pls.")
+
+    # Make sure that when the script is canceled it closes running instances of L4D2
+    except KeyboardInterrupt:
+      print("Exit: Closing all instances of L4D2.")
+      subprocess.call("TASKKILL /F /IM left4dead2.exe")
+      
+      raise
 
     time.sleep(5)
 
