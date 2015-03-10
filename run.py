@@ -96,7 +96,7 @@ def loop(servers, path_to_steam):
       print("Master server request timed out! Volvo pls.")
 
     # Make sure that when the script is canceled it closes running instances of L4D2
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, SystemExit):
       print("Exit: Closing all instances of L4D2.")
       subprocess.call("TASKKILL /F /IM left4dead2.exe")
       
