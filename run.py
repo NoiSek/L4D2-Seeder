@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 from valve.source import a2s as volvo
-import subprocess 
+import subprocess
+import random
 import time
 
 def get_servers():
@@ -60,6 +61,9 @@ def loop(servers, path_to_steam):
       if player_count < 2:
         print("Joining %s:%d" % current_server)
         current_thread = launch_game(current_server, path_to_steam)
+        
+        # Start a timer
+        timer_start = time.clock()
 
         # Check every 30 seconds to see if at least one human has joined
         while player_count < 2:
@@ -70,6 +74,10 @@ def loop(servers, path_to_steam):
             # Check if the new_player_count is actually a number due to Volvo shenanigans.
             if isinstance(new_player_count, int):
               player_count = new_player_count
+
+            # After 10 minutes, just disconnect and move on to prevent the server becoming 'stale'
+            if time.clock() - timer_start > 600:
+              break
 
           except volvo.NoResponseError:
             print("Master server request timed out! Volvo pls.")
@@ -104,7 +112,12 @@ def loop(servers, path_to_steam):
 
     time.sleep(5)
 
+# Change this only if the path to your Steam executable is different.
 path_to_steam = "C:\Program Files (x86)\Steam\Steam.exe"
 
+# Parse servers.lst and shuffle it in order to facilitate multiple running instances of the seeder.
 servers = get_servers()
+random.shuffle(servers)
+
+# Start cycling through the list.
 loop(servers, path_to_steam)
