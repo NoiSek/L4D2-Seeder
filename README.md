@@ -28,8 +28,8 @@ L4D2 should run regardless of where you have it installed, as long as
 Steam itself is located at it's default location in your Program Files 
 directory.
 
-As of now, L4D2 is set to launch in textonly mode, but will still 
-momentarily fullscreen the game when launching before collapsing to a 
-command prompt. As the game is launched and then terminated on every 
-connect, you may want to run this on a machine where you will not be 
-interrupted by it.
+As of last commit, L4D2 launches in true textonly mode and no longer 
+flashes to fullscreen before collapsing to the command prompt. As the 
+game is still launched and then terminated on every connect, you may 
+want to run this on a machine where you will not be interrupted by 
+it.
