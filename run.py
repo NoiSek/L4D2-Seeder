@@ -3,12 +3,12 @@ from valve.source import a2s as volvo
 import subprocess
 import random
 import time
+import os
 
 def get_servers():
   """ Grabs a list of servers from servers.lst to query, does not update in realtime. """
   servers = []
 
-  # Build our list of servers
   with open('servers.lst') as servers_list:
     for server in servers_list:
       
@@ -46,6 +46,11 @@ def launch_game(server, path_to_steam):
   args.extend(launch_options.split(" "))
   return subprocess.Popen(args, shell=False)
 
+def destroy_instances():
+  """ Destroys all running instances of L4D2 very roughly, only works on Windows. """
+  devnull = open(os.devnull, 'w')
+  subprocess.call("TASKKILL /F /IM left4dead2.exe", stdout=devnull, stderr=subprocess.STDOUT)
+
 def loop(servers, path_to_steam):
   """ Runs through the server list, seeds servers as necessary. """
   current_server = servers[0]
@@ -77,6 +82,7 @@ def loop(servers, path_to_steam):
 
             # After 10 minutes, just disconnect and move on to prevent the server becoming 'stale'
             if time.clock() - timer_start > 600:
+              print("10 minutes elapsed, cycling to next server.")
               break
 
           except volvo.NoResponseError:
@@ -84,21 +90,16 @@ def loop(servers, path_to_steam):
 
           time.sleep(30)
 
-        # Very roughly destroy the L4D2 process using a Windows only CMD tool.
         print("Server seeded: %s:%d (%d players)" % (current_server[0], current_server[1], player_count))
-        subprocess.call("TASKKILL /F /IM left4dead2.exe")
-
-        # Cycle to the next server in the list
-        servers.append(servers.pop(0))
-        current_server = servers[0]
+        destroy_instances()
 
       # This server is already seeded.
       else:
         print("Server %s:%d was already seeded. (%d players)" % (current_server[0], current_server[1], player_count))
 
-        # Cycle to the next server in the list
-        servers.append(servers.pop(0))
-        current_server = servers[0]
+      # Cycle to the next server in the list
+      servers.append(servers.pop(0))
+      current_server = servers[0]
 
     except volvo.NoResponseError:
       print("Master server request timed out! Volvo pls.")
@@ -106,7 +107,7 @@ def loop(servers, path_to_steam):
     # Make sure that when the script is canceled it closes running instances of L4D2
     except (KeyboardInterrupt, SystemExit):
       print("Exit: Closing all instances of L4D2.")
-      subprocess.call("TASKKILL /F /IM left4dead2.exe")
+      destroy_instances()
       
       raise
 
