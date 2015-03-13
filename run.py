@@ -40,7 +40,7 @@ def get_servers():
 
 def launch_game(server, path_to_steam):
   """ Launches L4D2 in textmode, and returns the process """
-  launch_options = "-applaunch 550 -textmode -nosound -noipx -novid -nopreload -nojoy -sw -noshader -nosound -low -replay_enable 0 -nohltv -width 640 -height 480 +connect %s:%d" % server
+  launch_options = "-applaunch 550 -silent -textmode -nosound -noipx -novid -nopreload -nojoy -sw -noshader -nosound -low -replay_enable 0 -nohltv -width 640 -height 480 +connect %s:%d" % server
   args = [path_to_steam]
 
   args.extend(launch_options.split(" "))
@@ -80,9 +80,9 @@ def loop(servers, path_to_steam):
             if isinstance(new_player_count, int):
               player_count = new_player_count
 
-            # After 10 minutes, just disconnect and move on to prevent the server becoming 'stale'
-            if time.clock() - timer_start > 600:
-              print("10 minutes elapsed, cycling to next server.")
+            # After 5 minutes, just disconnect and move on to prevent the server becoming 'stale'
+            if time.clock() - timer_start > 300:
+              print("5 minutes elapsed, cycling to next server.")
               break
 
           except volvo.NoResponseError:
