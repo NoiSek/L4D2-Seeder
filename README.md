@@ -19,7 +19,7 @@ To use this, edit the servers.lst to include all of the servers you with the scr
 
 L4D2 should run regardless of where you have it installed, as long as Steam itself is located at it's default location in your Program Files directory.
 
-As of 699f847608bab5a9c71cbd31131a9cfb63d17b4a, L4D2 launches in true textonly mode and no longer flashes to fullscreen before collapsing to the command prompt. As the game is still launched and then terminated on every connect, you may want to run this on a machine where you will not be interrupted by it.
+As of [699f84](https://github.com/NoiSek/L4D2-Seeder/commit/699f847608bab5a9c71cbd31131a9cfb63d17b4a), L4D2 launches in true textonly mode and no longer flashes to fullscreen before collapsing to the command prompt. As the game is still launched and then terminated on every connect, you may want to run this on a machine where you will not be interrupted by it.
 
 ## Hiding L4D2 windows
 It is now possible to hide L4D2 windows on Windows machines. This is not available by default and requires that you download an external library.
