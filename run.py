@@ -3,6 +3,7 @@ from valve.source import a2s as volvo
 import subprocess
 import random
 import time
+import sys
 import os
 
 def get_servers():
@@ -108,8 +109,7 @@ def loop(servers, path_to_steam):
     except (KeyboardInterrupt, SystemExit):
       print("Exit: Closing all instances of L4D2.")
       destroy_instances()
-      
-      raise
+      sys.exit(0)
 
     time.sleep(5)
 
