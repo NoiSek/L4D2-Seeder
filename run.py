@@ -66,8 +66,8 @@ def destroy_instances():
     # Do not exit until all processes are closed. Block the loop until the process has fully terminated.
     output = "Is the game done closing?"
     while output != "":
-      output, err = subprocess.Popen("ps cax | grep hl2_linux", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
-      time.sleep(2)
+      output, err = subprocess.Popen("ps cax | grep hl2_linux", shell=True, stdout=subprocess.PIP, stderr=subprocess.PIPE).communicate()
+
 
 def loop(servers, path_to_steam):
   """ Runs through the server list, seeds servers as necessary. """
