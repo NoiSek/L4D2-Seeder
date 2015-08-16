@@ -45,7 +45,7 @@ def get_servers():
 
 def launch_game(server, path_to_steam):
   """ Launches L4D2 in textmode, and returns the process """
-  launch_options = "-applaunch 550 -silent -textmode -nosound -noipx -novid -nopreload -nojoy -sw -noshader -low -replay_enable 0 -nohltv -width 1 -height 1 +connect %s:%d" % server
+  launch_options = "-applaunch 550 -silent -textmode -nosound -noipx -novid -nopreload -nojoy -sw -noshader -low -replay_enable 0 -nohltv -width 640 -height 480 +connect %s:%d" % server
   devnull = open(os.devnull, 'w')
 
   args = [path_to_steam]
