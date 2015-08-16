@@ -1,10 +1,14 @@
 #! /usr/bin/env python3
 from valve.source import a2s as volvo
 import subprocess
+import datetime
 import random
 import time
 import sys
 import os
+
+def current_time():
+  return datetime.datetime.now().strftime("%X")
 
 def get_servers():
   """ Grabs a list of servers from servers.lst to query, does not update in realtime. """
@@ -41,16 +45,22 @@ def get_servers():
 
 def launch_game(server, path_to_steam):
   """ Launches L4D2 in textmode, and returns the process """
-  launch_options = "-applaunch 550 -silent -textmode -nosound -noipx -novid -nopreload -nojoy -sw -noshader -nosound -low -replay_enable 0 -nohltv -width 640 -height 480 +connect %s:%d" % server
-  args = [path_to_steam]
+  launch_options = "-applaunch 550 -silent -textmode -nosound -noipx -novid -nopreload -nojoy -sw -noshader -low -replay_enable 0 -nohltv -width 1 -height 1 +connect %s:%d" % server
+  devnull = open(os.devnull, 'w')
 
+  args = [path_to_steam]
   args.extend(launch_options.split(" "))
-  return subprocess.Popen(args, shell=False)
+  
+  return subprocess.Popen(args, shell=False, stdout=devnull)
 
 def destroy_instances():
-  """ Destroys all running instances of L4D2 very roughly, only works on Windows. """
+  """ Destroys all running instances of L4D2 very roughly. """
   devnull = open(os.devnull, 'w')
-  subprocess.call("TASKKILL /F /IM left4dead2.exe", stdout=devnull, stderr=subprocess.STDOUT)
+  if sys.platform == "win32":
+    subprocess.call("TASKKILL /F /IM left4dead2.exe", stdout=devnull, stderr=subprocess.STDOUT)
+
+  elif sys.platform == "linux":
+    subprocess.call(['killall', 'hl2_linux'], stdout=devnull, stderr=subprocess.STDOUT)
 
 def loop(servers, path_to_steam):
   """ Runs through the server list, seeds servers as necessary. """
@@ -65,7 +75,7 @@ def loop(servers, path_to_steam):
       
       # Do we need to seed this server?
       if player_count < 2:
-        print("Joining %s:%d" % current_server)
+        print("%s: Joining %s:%d" % (current_time(), current_server[0], current_server[1]))
         current_thread = launch_game(current_server, path_to_steam)
         
         # Start a timer
@@ -83,27 +93,27 @@ def loop(servers, path_to_steam):
 
             # After 5 minutes, just disconnect and move on to prevent the server becoming 'stale'
             if time.clock() - timer_start > 300:
-              print("5 minutes elapsed, cycling to next server.")
+              print("%s: 5 minutes elapsed, cycling to next server." % (current_time()))
               break
 
           except volvo.NoResponseError:
-            print("Master server request timed out! Volvo pls.")
+            print("%s: Master server request timed out! Volvo pls." % (current_time()))
 
           time.sleep(30)
 
-        print("Server seeded: %s:%d (%d players)" % (current_server[0], current_server[1], player_count))
+        print("%s: Server seeded: %s:%d (%d players)" % (current_time(), current_server[0], current_server[1], player_count))
         destroy_instances()
 
       # This server is already seeded.
       else:
-        print("Server %s:%d was already seeded. (%d players)" % (current_server[0], current_server[1], player_count))
+        print("%s: Server %s:%d was already seeded. (%d players)" % (current_time(), current_server[0], current_server[1], player_count))
 
       # Cycle to the next server in the list
       servers.append(servers.pop(0))
       current_server = servers[0]
 
     except volvo.NoResponseError:
-      print("Master server request timed out! Volvo pls.")
+      print("%s: Master server request timed out! Volvo pls." % (current_time()))
 
     # Make sure that when the script is canceled it closes running instances of L4D2
     except (KeyboardInterrupt, SystemExit):
@@ -113,8 +123,14 @@ def loop(servers, path_to_steam):
 
     time.sleep(5)
 
+
 # Change this only if the path to your Steam executable is different.
 path_to_steam = "C:\Program Files (x86)\Steam\Steam.exe"
+
+if sys.platform == "linux":
+  # Will find your Steam executable automatically if possible.
+  path, err = subprocess.Popen(['which', 'steam'], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+  path_to_steam = path.strip()
 
 # Parse servers.lst and shuffle it in order to facilitate multiple running instances of the seeder.
 servers = get_servers()
