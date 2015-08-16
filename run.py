@@ -44,7 +44,7 @@ def get_servers():
   return servers
 
 def launch_game(server, path_to_steam):
-  """ Launches L4D2 in textmode, and returns the process """
+  """ Launches L4D2 in textmode, and returns the process. """
   launch_options = "-applaunch 550 -silent -textmode -nosound -noipx -novid -nopreload -nojoy -sw -noshader -low -replay_enable 0 -nohltv -width 640 -height 480 +connect %s:%d" % server
   devnull = open(os.devnull, 'w')
 
@@ -56,11 +56,18 @@ def launch_game(server, path_to_steam):
 def destroy_instances():
   """ Destroys all running instances of L4D2 very roughly. """
   devnull = open(os.devnull, 'w')
+
   if sys.platform == "win32":
     subprocess.call("TASKKILL /F /IM left4dead2.exe", stdout=devnull, stderr=subprocess.STDOUT)
 
   elif "linux" in sys.platform:
     subprocess.call(['killall', 'hl2_linux'], stdout=devnull, stderr=subprocess.STDOUT)
+
+    # Do not exit until all processes are closed. Block the loop until the process has fully terminated.
+    output = "Is the game done closing?"
+    while output != "":
+      output, err = subprocess.Popen("ps cax | grep hl2_linux", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
+      time.sleep(2)
 
 def loop(servers, path_to_steam):
   """ Runs through the server list, seeds servers as necessary. """
