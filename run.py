@@ -59,7 +59,7 @@ def destroy_instances():
   if sys.platform == "win32":
     subprocess.call("TASKKILL /F /IM left4dead2.exe", stdout=devnull, stderr=subprocess.STDOUT)
 
-  elif sys.platform == "linux":
+  elif "linux" in sys.platform:
     subprocess.call(['killall', 'hl2_linux'], stdout=devnull, stderr=subprocess.STDOUT)
 
 def loop(servers, path_to_steam):
@@ -127,7 +127,7 @@ def loop(servers, path_to_steam):
 # Change this only if the path to your Steam executable is different.
 path_to_steam = "C:\Program Files (x86)\Steam\Steam.exe"
 
-if sys.platform == "linux":
+if "linux" in sys.platform:
   # Will find your Steam executable automatically if possible.
   path, err = subprocess.Popen(['which', 'steam'], stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate()
   path_to_steam = path.strip()
